@@ -23,7 +23,7 @@ model Vehiculo {
 }
 
 model Conductor {
-  id              Int    @id @default(autoincrement())
+  id              String @id @unique @default(uuid())
   nombres         String
   apellidos       String
   numero_licencia String @unique
@@ -33,21 +33,21 @@ model Conductor {
 }
 
 model Ruta {
-  id            Int           @id @default(autoincrement())
+  id            String        @id @unique @default(uuid())
   fecha         DateTime
   conductor     Conductor     @relation(fields: [conductorId], references: [id])
-  conductorId   Int
+  conductorId   String
   vehiculo      Vehiculo      @relation(fields: [vehiculoPlaca], references: [placa])
   vehiculoPlaca String
   detalles      DetalleRuta[]
 }
 
 model DetalleRuta {
-  id             Int    @id @default(autoincrement())
+  id             String @id @unique @default(uuid())
   latitud        Float
   longitud       Float
   direccion      String
   numero_paquete String
   ruta           Ruta   @relation(fields: [rutaId], references: [id])
-  rutaId         Int
+  rutaId         String
 }
