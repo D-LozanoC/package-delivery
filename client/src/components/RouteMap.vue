@@ -1,4 +1,5 @@
 <template>
+  
   <div ref="mapContainer" class="map-container"></div>
 </template>
 
@@ -18,11 +19,43 @@ const props = defineProps<{
 
 const mapContainer = ref<HTMLElement | null>(null);
 let map: L.Map;
-let rutaPolyline: L.Polyline | null = null;
+let idaPolyline: L.Polyline | null = null;
+let vueltaPolyline: L.Polyline | null = null;
+let markers: L.Marker[] = [];
 
-// Almacenar la ruta optimizada
-const rutaOptimizada = ref<Array<{ lat: number; lng: number }>>([]);
-const ultimoPuntoAntesDeRegresar = ref<{ lat: number; lng: number } | null>(null);
+// Iconos personalizados
+const warehouseIcon = L.icon({
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/447/447031.png',
+  iconSize: [32, 32],
+});
+
+const deliveryIcon = L.icon({
+  iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+  iconSize: [28, 28],
+});
+
+// Limpiar elementos del mapa
+const clearMap = () => {
+  [idaPolyline, vueltaPolyline].forEach(layer => {
+    if (layer) map.removeLayer(layer);
+  });
+  markers.forEach(marker => map.removeLayer(marker));
+  markers = [];
+};
+
+// Obtener ruta optimizada desde OSRM
+const getOptimizedRoute = async (coordinates: string) => {
+  const url = `https://router.project-osrm.org/trip/v1/driving/${coordinates}?source=first&roundtrip=false&overview=full&geometries=polyline`;
+  const response = await axios.get(url);
+  return response.data;
+};
+
+// Obtener ruta de regreso
+const getReturnRoute = async (from: string, to: string) => {
+  const url = `https://router.project-osrm.org/route/v1/driving/${from};${to}?overview=full&geometries=polyline`;
+  const response = await axios.get(url);
+  return response.data;
+};
 
 onMounted(() => {
   if (mapContainer.value) {
@@ -35,67 +68,72 @@ watch(
   () => props.puntos,
   async (newPuntos) => {
     if (!map || newPuntos.length < 2) return;
-
-    // Eliminar ruta previa si existe
-    if (rutaPolyline) {
-      map.removeLayer(rutaPolyline);
-      rutaPolyline = null;
-    }
-
-    // Eliminar marcadores previos
-    map.eachLayer((layer) => {
-      if (layer instanceof L.Marker) {
-        map.removeLayer(layer);
-      }
-    });
-
-    // Construcción de la URL de OSRM
-    const coords = newPuntos.map((p) => `${p.lng},${p.lat}`).join(';');
-    const tripUrl = `https://router.project-osrm.org/trip/v1/driving/${coords}?source=first&roundtrip=true&overview=full&geometries=polyline`;
+    clearMap();
 
     try {
-      const response = await axios.get(tripUrl);
-      const data = response.data;
+      // 1. Obtener ruta optimizada de ida
+      const coords = newPuntos.map(p => `${p.lng},${p.lat}`).join(';');
+      const tripData = await getOptimizedRoute(coords);
 
-      if (data.trips && data.trips.length > 0) {
-        const bestRoute = data.trips[0];
-
-        // Obtener el orden optimizado de los puntos
-        const waypoints = data.waypoints.sort((a: any, b: any) => a.waypoint_index - b.waypoint_index);
-        rutaOptimizada.value = waypoints.map((w: any) => ({
-          lat: w.location[1],
-          lng: w.location[0]
+      // 2. Procesar resultados
+      const optimizedWaypoints = tripData.waypoints
+        .sort((a: any, b: any) => a.waypoint_index - b.waypoint_index)
+        .map((wp: any) => ({
+          lat: wp.location[1],
+          lng: wp.location[0],
+          direccion: newPuntos[wp.waypoint_index]?.direccion
         }));
 
-        // Determinar el último punto antes de regresar a la bodega
-        if (rutaOptimizada.value.length > 2) {
-          // Tomamos el penúltimo punto, ya que el último es la bodega
-          ultimoPuntoAntesDeRegresar.value = rutaOptimizada.value[rutaOptimizada.value.length - 2];
-        } else {
-          ultimoPuntoAntesDeRegresar.value = null;
-        }
+      // 3. Obtener último punto de entrega
+      const lastDelivery = optimizedWaypoints[optimizedWaypoints.length - 1];
 
-        // Dibujar la ruta optimizada
-        const decodedCoords: Array<[number, number]> = polyline.decode(bestRoute.geometry);
-        rutaPolyline = L.polyline(decodedCoords, {
-          color: '#007bff',
-          weight: 4
+      // 4. Obtener ruta de vuelta
+      const returnData = await getReturnRoute(
+        `${lastDelivery.lng},${lastDelivery.lat}`,
+        `${newPuntos[0].lng},${newPuntos[0].lat}`
+      );
+
+      // 5. Dibujar rutas
+      const idaGeometry = polyline.decode(tripData.trips[0].geometry);
+      const vueltaGeometry = polyline.decode(returnData.routes[0].geometry);
+
+      idaPolyline = L.polyline(idaGeometry, {
+        color: '#007bff',
+        weight: 4,
+        dashArray: '5, 5'
+      }).addTo(map);
+
+      vueltaPolyline = L.polyline(vueltaGeometry, {
+        color: '#ff4500',
+        weight: 4,
+        dashArray: '5, 5'
+      }).addTo(map);
+
+      // 6. Añadir marcadores
+      optimizedWaypoints.forEach((punto: any, index: number) => {
+        const isWarehouse = index === 0;
+        const marker = L.marker([punto.lat, punto.lng], {
+          icon: isWarehouse ? warehouseIcon : deliveryIcon
         }).addTo(map);
 
-        // Ajustar la vista
-        map.fitBounds(rutaPolyline.getBounds().pad(0.2));
+        marker.bindPopup(`
+          <strong>${isWarehouse ? 'BODEGA' : `ENTREGA ${index}`}</strong><br>
+          ${punto.direccion || 'Sin dirección registrada'}
+        `);
 
-        // Dibujar marcadores en el orden optimizado
-        rutaOptimizada.value.forEach((punto, index) => {
-          const marker = L.marker([punto.lat, punto.lng]).addTo(map);
-          marker.bindPopup(`
-            <strong>${index === 0 ? 'Bodega Principal' : `Entrega ${index}`}</strong><br>
-            ${props.puntos.find(p => p.lat === punto.lat && p.lng === punto.lng)?.direccion || ''}
-          `);
-        });
-      }
+        markers.push(marker);
+      });
+
+      // 7. Ajustar vista del mapa
+      const allPoints = [
+        ...idaGeometry.map(([lat, lng]) => L.latLng(lat, lng)),
+        ...vueltaGeometry.map(([lat, lng]) => L.latLng(lat, lng))
+      ];
+
+      map.fitBounds(L.latLngBounds(allPoints).pad(0.2));
+
     } catch (error) {
-      console.error('Error al obtener la ruta optimizada:', error);
+      console.error('Error al calcular rutas:', error);
     }
   },
   { deep: true }
@@ -106,5 +144,7 @@ watch(
 .map-container {
   width: 100%;
   height: 500px;
+  border-radius: 8px;
+  overflow: hidden;
 }
 </style>
