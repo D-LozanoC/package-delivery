@@ -1,22 +1,33 @@
-<script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
-</script>
-
 <template>
-  <HelloWorld msg="Vite + Vue" />
+  <header>
+    <nav>
+      <router-link to="/vehiculos">Registrar Vehículo</router-link>
+      <router-link to="/conductores">Registrar Conductores</router-link>
+      <router-link to="/rutas/crear">Programar Rutas</router-link>
+    </nav>
+  </header>
+  <main>
+    <router-view></router-view>
+  </main>
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+<style>
+#app {
+  font-family: Arial, sans-serif;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+
+nav {
+  padding: 1rem;
+  background-color: #f0f0f0;
 }
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+
+nav a {
+  margin-right: 1rem;
+  text-decoration: none;
+  color: #333;
+}
+
+nav a:hover {
+  color: #4CAF50;
 }
 </style>
