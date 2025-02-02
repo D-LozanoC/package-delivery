@@ -56,7 +56,7 @@ export const searchRutas = async (req: Request, res: Response) => {
         };
     }
 
-    if (conductorId) where.conductorId = Number(conductorId);
+    if (conductorId) where.conductorId = conductorId;
     if (vehiculoPlaca) where.vehiculoPlaca = vehiculoPlaca;
 
     try {
