@@ -28,12 +28,16 @@
       <button type="submit">Programar Ruta</button>
     </form>
   </div>
+  <DetalleMapForm v-if="rutaCreada" :rutaId="rutaCreada.id" @points-added="handlePointsAdded" />
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { type conductor, type vehiculo } from '../types';
+import DetalleMapForm from '../components/DetalleMapForm.vue';
+
+const rutaCreada = ref<any>(null);
 
 const form = ref({
   conductorId: '',
@@ -43,6 +47,16 @@ const form = ref({
 
 const conductores = ref<conductor[]>([]);
 const vehiculos = ref<vehiculo[]>([]);
+
+const handlePointsAdded = async (points: any[]) => {
+  try {
+    await axios.post(`http://localhost:3000/rutas/${rutaCreada.value.id}/detalles`, points);
+    alert('Puntos guardados exitosamente!');
+    window.location.reload();
+  } catch (error) {
+    alert('Error guardando puntos');
+  }
+};
 
 // Obtener conductores y vehículos al cargar el componente
 onMounted(async () => {
@@ -60,10 +74,11 @@ onMounted(async () => {
 });
 
 const submitForm = async () => {
+  console.log(form.value)
   try {
     const response = await axios.post('http://localhost:3000/rutas', form.value);
+    rutaCreada.value = response.data;
     alert(`Ruta programada! ID: ${response.data.id}`);
-    form.value = { conductorId: '', vehiculoPlaca: '', fecha: '' };
   } catch (error) {
     alert('Error al programar la ruta');
   }

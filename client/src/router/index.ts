@@ -3,6 +3,8 @@ import { createRouter, createWebHistory } from 'vue-router';
 import VehiculosView from '../views/VehiculosView.vue';
 import ConductoresView from '../views/ConductoresView.vue';
 import RutasCreateView from '../views/RutasCreateView.vue';
+import RutasSearchView from '../views/RutasSearchView.vue';
+import RutaDetailsView from '../views/RutaDetailsView.vue';
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -21,6 +23,16 @@ const router = createRouter({
             path: '/rutas/crear',
             name: 'rutas-create',
             component: RutasCreateView
+        },
+        {
+            path: '/rutas',
+            name: 'rutas-search',
+            component: RutasSearchView
+        },
+        {
+            path: '/rutas/:id',
+            name: 'ruta-details',
+            component: RutaDetailsView
         }
     ],
 });

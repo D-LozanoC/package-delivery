@@ -4,6 +4,7 @@
       <router-link to="/vehiculos">Registrar Vehículo</router-link>
       <router-link to="/conductores">Registrar Conductores</router-link>
       <router-link to="/rutas/crear">Programar Rutas</router-link>
+      <router-link to="/rutas">Buscar Rutas</router-link>
     </nav>
   </header>
   <main>
