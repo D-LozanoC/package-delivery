@@ -1,5 +1,10 @@
 <template>
-  
+  <div class="legend">
+    <div class="routes">
+      <span class="line ida"></span> Ruta de Ida
+      <span class="line vuelta"></span> Ruta de Vuelta
+    </div>
+  </div>
   <div ref="mapContainer" class="map-container"></div>
 </template>
 
@@ -145,5 +150,39 @@ watch(
   height: 500px;
   border-radius: 8px;
   overflow: hidden;
+}
+
+.legend {
+  position: relative;
+}
+
+.routes {
+  padding: .5rem;
+  position: absolute;
+  right: 0;
+  top: 0;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-weight: 700;
+  color: #333;
+}
+
+.line {
+  display: inline-block;
+  width: 50px;
+  height: 5px;
+  border-radius: 3px;
+}
+
+.ida {
+  background-color: #007bff;
+  /* Color de ida */
+}
+
+.vuelta {
+  background-color: #ff4500;
+  /* Color de vuelta */
 }
 </style>

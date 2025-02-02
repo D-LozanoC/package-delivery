@@ -96,7 +96,7 @@ const formatFecha = (fecha: string) => {
 
 .map-container {
   width: 100%;
-  height: 400px;
+  height: 500px;
   border: 2px solid #e2e2e2;
   border-radius: 8px;
   overflow: hidden;
