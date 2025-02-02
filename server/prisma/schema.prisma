@@ -12,3 +12,42 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Vehiculo {
+  placa           String @id @unique
+  modelo          String
+  color           String
+  marca           String
+  capacidad_carga Float
+  rutas           Ruta[]
+}
+
+model Conductor {
+  id              Int    @id @default(autoincrement())
+  nombres         String
+  apellidos       String
+  numero_licencia String @unique
+  telefono        String
+  correo          String @unique
+  rutas           Ruta[]
+}
+
+model Ruta {
+  id            Int           @id @default(autoincrement())
+  fecha         DateTime
+  conductor     Conductor     @relation(fields: [conductorId], references: [id])
+  conductorId   Int
+  vehiculo      Vehiculo      @relation(fields: [vehiculoPlaca], references: [placa])
+  vehiculoPlaca String
+  detalles      DetalleRuta[]
+}
+
+model DetalleRuta {
+  id             Int    @id @default(autoincrement())
+  latitud        Float
+  longitud       Float
+  direccion      String
+  numero_paquete String
+  ruta           Ruta   @relation(fields: [rutaId], references: [id])
+  rutaId         Int
+}
