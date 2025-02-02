@@ -4,6 +4,7 @@ import morgan from 'morgan'
 import vehiculoRouter from './routes/vehiculo';
 import conductoresRouter from './routes/conductores';
 import rutasRouter from './routes/rutas';
+import detallesRutaRouter from './routes/detallesRuta';
 
 process.loadEnvFile()
 
@@ -21,6 +22,7 @@ app.get('/health', (_req, res) => {
 app.use('/vehiculos', vehiculoRouter);
 app.use('/conductores', conductoresRouter);
 app.use('/rutas', rutasRouter);
+app.use('/rutas', detallesRutaRouter);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port http://localhost:${PORT}`));
