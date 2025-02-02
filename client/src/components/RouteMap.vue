@@ -99,14 +99,13 @@ watch(
 
       idaPolyline = L.polyline(idaGeometry, {
         color: '#007bff',
-        weight: 4,
+        weight: 3,
         dashArray: '5, 5'
       }).addTo(map);
 
       vueltaPolyline = L.polyline(vueltaGeometry, {
         color: '#ff4500',
-        weight: 4,
-        dashArray: '5, 5'
+        weight: 2
       }).addTo(map);
 
       // 6. Añadir marcadores
