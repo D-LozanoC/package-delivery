@@ -5,6 +5,7 @@ import ConductoresView from '../views/ConductoresView.vue';
 import RutasCreateView from '../views/RutasCreateView.vue';
 import RutasSearchView from '../views/RutasSearchView.vue';
 import RutaDetailsView from '../views/RutaDetailsView.vue';
+import DocsView from '../views/DocsView.vue';
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -33,6 +34,11 @@ const router = createRouter({
             path: '/rutas/:id',
             name: 'ruta-details',
             component: RutaDetailsView
+        },
+        {
+            path: '/docs',
+            name: 'docs',
+            component: DocsView
         }
     ],
 });

@@ -55,4 +55,6 @@
   - rutas (Rutas programadas)
   - detalle_ruta (Puntos de entrega específicos)
 
-## Diagrama de Acceso
+## Diagrama de Componentes
+
+![./client/public/image.png]
