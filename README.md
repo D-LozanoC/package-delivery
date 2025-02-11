@@ -57,4 +57,4 @@
 
 ## Diagrama de Componentes
 
-![Imagen de diagramas](./client/public/image.png)
+![Imagen de diagramas](./client/src/public/image.png)
